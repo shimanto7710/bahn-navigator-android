@@ -1,16 +1,12 @@
-package com.rookie.code.bahnnavigator
+package com.rookie.code.bahnnavigator.feature
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.rookie.code.bahnnavigator.navigation.BahnNavigatorApp
 import com.rookie.code.bahnnavigator.ui.theme.BahnNavigatorTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,29 +15,21 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BahnNavigatorTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                BahnNavigatorApp()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun Greeting(name: String) {
+    androidx.compose.material3.Text(text = "Hello $name!")
 }
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     BahnNavigatorTheme {
-        Greeting("Android")
+        _root_ide_package_.com.rookie.code.bahnnavigator.feature.Greeting("Android")
     }
 }
