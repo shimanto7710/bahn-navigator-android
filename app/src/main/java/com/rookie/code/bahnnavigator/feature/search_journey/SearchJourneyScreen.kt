@@ -43,29 +43,79 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 
 
 @Composable
 fun SearchJourneyRoute(
     modifier: Modifier = Modifier,
-    searchJourneyViewModel: SearchJourneyViewModel = viewModel()
+    viewModel: SearchJourneyViewModel = hiltViewModel()
 ) {
-    val uiState by searchJourneyViewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { result ->
+        val granted = result[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                result[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (granted) viewModel.onCurrentPositionClick()
+    }
+
+    val requestLocation = {
+        val granted = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+
+        if (granted) {
+            viewModel.onCurrentPositionClick()
+        } else {
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
 
     SearchJourneyScreen(
         modifier = modifier,
         uiState = uiState,
-        onFromChange = searchJourneyViewModel::onFromChange,
-        onToChange = searchJourneyViewModel::onToChange,
-        onSwapRouteClick = searchJourneyViewModel::onSwapRouteClick,
-        onDateClick = searchJourneyViewModel::onDateClick,
-        onPassengersClick = searchJourneyViewModel::onPassengersClick,
-        onOptionsClick = searchJourneyViewModel::onOptionsClick,
-        onConnectionTypeClick = searchJourneyViewModel::onConnectionTypeClick,
-        onSearchClick = searchJourneyViewModel::onSearchClick
+        onFromChange = viewModel::onFromChange,
+        onToChange = viewModel::onToChange,
+        onFromClick = { viewModel.onLocationPickerOpened(PickerTarget.ORIGIN) },
+        onToClick = { viewModel.onLocationPickerOpened(PickerTarget.DESTINATION) },
+        onSwapRouteClick = viewModel::onSwapRouteClick,
+        onDateClick = viewModel::onDateClick,
+        onPassengersClick = viewModel::onPassengersClick,
+        onOptionsClick = viewModel::onOptionsClick,
+        onConnectionTypeClick = viewModel::onConnectionTypeClick,
+        onSearchClick = viewModel::onSearchClick
     )
+
+    if (uiState.locationPicker.isVisible) {
+        LocationPickerSheet(
+            state = uiState.locationPicker,
+            onDismiss = viewModel::onLocationPickerDismiss,
+            onSearchChange = viewModel::onLocationSearchChange,
+            onSelect = viewModel::onLocationSelected,
+            onToggleFavorite = viewModel::onToggleFavorite,
+            onCurrentPositionClick = requestLocation,
+            onNearbyStopsClick = requestLocation
+        )
+    }
+
 }
 
 @Composable
@@ -74,6 +124,8 @@ fun SearchJourneyScreen(
     uiState: SearchJourneyUiState,
     onFromChange: (String) -> Unit = {},
     onToChange: (String) -> Unit = {},
+    onFromClick: () -> Unit = {},
+    onToClick: () -> Unit = {},
     onSwapRouteClick: () -> Unit = {},
     onDateClick: () -> Unit = {},
     onPassengersClick: () -> Unit = {},
@@ -94,6 +146,8 @@ fun SearchJourneyScreen(
             to = uiState.to,
             onFromChange = onFromChange,
             onToChange = onToChange,
+            onFromClick = onFromClick,
+            onToClick = onToClick,
             onSwapRouteClick = onSwapRouteClick
         )
         Spacer(modifier = Modifier.height(24.dp))
@@ -138,6 +192,8 @@ fun RouteFields(
     to: String,
     onFromChange: (String) -> Unit,
     onToChange: (String) -> Unit,
+    onFromClick: () -> Unit,
+    onToClick: () -> Unit,
     onSwapRouteClick: () -> Unit
 ) {
     Box(
@@ -149,7 +205,8 @@ fun RouteFields(
             StationTextField(
                 value = from,
                 onValueChange = onFromChange,
-                placeholder = "From"
+                placeholder = "From",
+                onClick = onFromClick
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -157,7 +214,8 @@ fun RouteFields(
             StationTextField(
                 value = to,
                 onValueChange = onToChange,
-                placeholder = "To"
+                placeholder = "To",
+                onClick = onToClick
             )
         }
 
@@ -191,12 +249,15 @@ fun RouteFields(
 private fun StationTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    placeholder: String
+    placeholder: String,
+    onClick: () -> Unit = {}
 ) {
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
         singleLine = true,
+        readOnly = true,
+        enabled = false,
         textStyle = TextStyle(
             color = Color.Black,
             fontSize = 22.sp
@@ -208,6 +269,7 @@ private fun StationTextField(
                 color = Color(0xFFF3F3F7),
                 shape = RoundedCornerShape(8.dp)
             )
+            .clickable(onClick = onClick)
             .padding(horizontal = 16.dp),
         decorationBox = { innerTextField ->
             Box(
