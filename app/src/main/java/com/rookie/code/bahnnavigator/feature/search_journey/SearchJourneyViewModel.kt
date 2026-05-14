@@ -3,6 +3,7 @@ package com.rookie.code.bahnnavigator.feature.search_journey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rookie.code.bahnnavigator.core.LocationProvider
+import com.rookie.code.bahnnavigator.feature.search_journey.data.FavoriteRepository
 import com.rookie.code.bahnnavigator.feature.search_journey.data.LocationRepository
 import com.rookie.code.bahnnavigator.feature.search_journey.data.SearchStationModelElement
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,7 +37,8 @@ data class SearchJourneyUiState(
 @HiltViewModel
 class SearchJourneyViewModel @Inject constructor(
     private val locationRepository: LocationRepository,
-    private val locationProvider: LocationProvider
+    private val locationProvider: LocationProvider,
+    private val favoriteRepository: FavoriteRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SearchJourneyUiState())
     val uiState: StateFlow<SearchJourneyUiState> = _uiState.asStateFlow()
@@ -44,6 +46,7 @@ class SearchJourneyViewModel @Inject constructor(
 
     init {
         observeSearchText()
+        observeFavorites()
     }
 
     private fun observeSearchText() {
@@ -57,6 +60,18 @@ class SearchJourneyViewModel @Inject constructor(
     }
 
 
+    private fun observeFavorites() {
+        favoriteRepository.observeFavorites()
+            .onEach { favs ->
+                _uiState.update {
+                    it.copy(locationPicker = it.locationPicker.copy(
+                        favorites = favs,
+                        favoriteIds = favs.map { f -> f.displayId }.toSet()
+                    ))
+                }
+            }
+            .launchIn(viewModelScope)
+    }
 
     fun onFromChange(value: String) {
         _uiState.update { it.copy(from = value) }
@@ -219,11 +234,8 @@ class SearchJourneyViewModel @Inject constructor(
     }
 
     fun onToggleFavorite(location: SearchStationModelElement) {
-        _uiState.update {
-            val ids = it.locationPicker.favoriteIds.toMutableSet()
-            val id = location.displayId
-            if (!ids.add(id)) ids.remove(id)
-            it.copy(locationPicker = it.locationPicker.copy(favoriteIds = ids))
+        viewModelScope.launch {
+            favoriteRepository.toggle(location)
         }
     }
 
@@ -245,6 +257,7 @@ data class LocationPickerUiState(
     val title: String = "",
     val searchText: String = "",
     val results: List<SearchStationModelElement> = emptyList(),
+    val favorites: List<SearchStationModelElement> = emptyList(),
     val favoriteIds: Set<String> = emptySet(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null

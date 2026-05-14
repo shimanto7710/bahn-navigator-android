@@ -155,19 +155,42 @@ private fun LocationPickerContent(
 
         Spacer(Modifier.height(6.dp))
 
+        val nonFavResults = state.results.filterNot { state.favoriteIds.contains(it.displayId) }
+
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            if (state.results.isEmpty() && !state.isLoading && state.errorMessage == null) {
+
+            // Favorites — always visible
+            if (state.favorites.isNotEmpty()) {
+                items(state.favorites, key = { "fav-${it.displayId}" }) { fav ->
+                    LocationRow(
+                        location = fav,
+                        isFavorite = true,
+                        onSelect = { onSelect(fav) },
+                        onToggleFavorite = { onToggleFavorite(fav) }
+                    )
+                }
+                item { FilterDivider() }
+            }
+
+            // API results
+            if (nonFavResults.isEmpty() && state.favorites.isEmpty()
+                && !state.isLoading && state.errorMessage == null
+            ) {
                 item {
                     MessageRow(Icons.Default.Search, "No locations found", Color.Gray)
                 }
             } else {
-                itemsIndexed(state.results, key = { index, loc -> "${loc.displayId}-$index" }) { _, loc ->
+                itemsIndexed(
+                    nonFavResults,
+                    key = { index, loc -> "res-${loc.displayId}-$index" }
+                ) { _, loc ->
                     LocationRow(
                         location = loc,
-                        isFavorite = state.favoriteIds.contains(loc.displayId),
+                        isFavorite = false,
                         onSelect = { onSelect(loc) },
                         onToggleFavorite = { onToggleFavorite(loc) }
                     )
+                    FilterDivider()
                 }
             }
         }
