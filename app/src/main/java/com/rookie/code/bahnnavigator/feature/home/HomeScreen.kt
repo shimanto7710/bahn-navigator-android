@@ -14,12 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.rookie.code.bahnnavigator.feature.search_journey.SearchJourneyRoute
-import com.rookie.code.bahnnavigator.feature.search_journey.SearchJourneyScreen
-import com.rookie.code.bahnnavigator.feature.search_journey.SearchJourneyUiState
+import com.rookie.code.bahnnavigator.feature.searchjourney.presentation.SearchJourneyRoute
 import com.rookie.code.bahnnavigator.navigation.HomeTabRoute
 import com.rookie.code.bahnnavigator.navigation.homeTabRoutes
-import com.rookie.code.bahnnavigator.ui.theme.BahnNavigatorTheme
+import com.rookie.code.bahnnavigator.core.ui.theme.BahnNavigatorTheme
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
