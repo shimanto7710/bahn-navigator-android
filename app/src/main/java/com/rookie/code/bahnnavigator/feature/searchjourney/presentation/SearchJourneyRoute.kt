@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.rookie.code.bahnnavigator.feature.searchjourney.presentation.components.DatePickerSheet
 import com.rookie.code.bahnnavigator.feature.searchjourney.presentation.components.LocationPickerSheet
 import com.rookie.code.bahnnavigator.feature.searchjourney.presentation.state.PickerTarget
 
@@ -74,6 +75,20 @@ fun SearchJourneyRoute(
             onToggleFavorite = viewModel::onToggleFavorite,
             onCurrentPositionClick = requestLocation,
             onNearbyStopsClick = requestLocation
+        )
+    }
+
+    if (uiState.datePicker.isVisible) {
+        DatePickerSheet(
+            state = uiState.datePicker,
+            onDismiss = viewModel::onDatePickerDismiss,
+            onDone = viewModel::onDatePickerDone,
+            onDateSelected = viewModel::onDateSelected,
+            onDepartureSelected = viewModel::onDepartureSelected,
+            onArrivalSelected = viewModel::onArrivalSelected,
+            onNowClick = viewModel::onNowClick,
+            onIn15MinClick = viewModel::onIn15MinClick,
+            onIn1HourClick = viewModel::onIn1HourClick
         )
     }
 }

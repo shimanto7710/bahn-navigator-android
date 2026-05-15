@@ -7,5 +7,6 @@ data class SearchJourneyUiState(
     val passengers: String = "1 pers. | 2nd Cl.",
     val options: String = "Means of transport",
     val connectionType: String = "Fastest Route",
-    val locationPicker: LocationPickerUiState = LocationPickerUiState()
+    val locationPicker: LocationPickerUiState = LocationPickerUiState(),
+    val datePicker: DateTimePickerUiState = DateTimePickerUiState()
 )

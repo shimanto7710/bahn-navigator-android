@@ -383,7 +383,7 @@ private fun iconFor(location: SearchStationModelElement): ImageVector =
         SearchStationModelType.STOP -> Icons.Default.Train
     }
 
-@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Preview(showBackground = true, widthDp = 390, heightDp = 844, apiLevel = 34)
 @Composable
 private fun LocationPickerSheetPreview() {
     val sample = { id: String, name: String, type: SearchStationModelType, address: String? ->

@@ -6,9 +6,13 @@ import com.rookie.code.bahnnavigator.core.location.LocationProvider
 import com.rookie.code.bahnnavigator.feature.searchjourney.data.remote.dto.SearchStationModelElement
 import com.rookie.code.bahnnavigator.feature.searchjourney.data.repository.FavoriteRepository
 import com.rookie.code.bahnnavigator.feature.searchjourney.data.repository.LocationRepository
+import com.rookie.code.bahnnavigator.feature.searchjourney.presentation.state.DateTimePickerUiState
 import com.rookie.code.bahnnavigator.feature.searchjourney.presentation.state.LocationPickerUiState
 import com.rookie.code.bahnnavigator.feature.searchjourney.presentation.state.PickerTarget
 import com.rookie.code.bahnnavigator.feature.searchjourney.presentation.state.SearchJourneyUiState
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -79,7 +83,96 @@ class SearchJourneyViewModel @Inject constructor(
         _uiState.update { it.copy(from = it.to, to = it.from) }
     }
 
-    fun onDateClick() = Unit
+    fun onDateClick() {
+        _uiState.update { it.copy(datePicker = it.datePicker.copy(isVisible = true)) }
+    }
+
+    fun onDatePickerDismiss() {
+        _uiState.update { it.copy(datePicker = it.datePicker.copy(isVisible = false)) }
+    }
+
+    fun onDatePickerDone() {
+        val picker = _uiState.value.datePicker
+        _uiState.update {
+            it.copy(
+                date = formatDateLabel(picker),
+                datePicker = it.datePicker.copy(isVisible = false)
+            )
+        }
+    }
+
+    fun onDateSelected(year: Int, month: Int, day: Int) {
+        _uiState.update {
+            it.copy(datePicker = it.datePicker.copy(
+                selectedYear = year, selectedMonth = month, selectedDay = day
+            ))
+        }
+    }
+
+    fun onDepartureSelected() {
+        _uiState.update { it.copy(datePicker = it.datePicker.copy(isDeparture = true)) }
+    }
+
+    fun onArrivalSelected() {
+        _uiState.update { it.copy(datePicker = it.datePicker.copy(isDeparture = false)) }
+    }
+
+    fun onNowClick() {
+        val now = Calendar.getInstance()
+        _uiState.update {
+            it.copy(datePicker = it.datePicker.copy(
+                selectedHour = now.get(Calendar.HOUR_OF_DAY),
+                selectedMinute = now.get(Calendar.MINUTE)
+            ))
+        }
+    }
+
+    fun onIn15MinClick() {
+        val cal = Calendar.getInstance().apply { add(Calendar.MINUTE, 15) }
+        _uiState.update {
+            it.copy(datePicker = it.datePicker.copy(
+                selectedHour = cal.get(Calendar.HOUR_OF_DAY),
+                selectedMinute = cal.get(Calendar.MINUTE)
+            ))
+        }
+    }
+
+    fun onIn1HourClick() {
+        val cal = Calendar.getInstance().apply { add(Calendar.HOUR_OF_DAY, 1) }
+        _uiState.update {
+            it.copy(datePicker = it.datePicker.copy(
+                selectedHour = cal.get(Calendar.HOUR_OF_DAY),
+                selectedMinute = cal.get(Calendar.MINUTE)
+            ))
+        }
+    }
+
+    private fun formatDateLabel(picker: DateTimePickerUiState): String {
+        val today = Calendar.getInstance()
+        val isToday = picker.selectedYear == today.get(Calendar.YEAR) &&
+                picker.selectedMonth == today.get(Calendar.MONTH) + 1 &&
+                picker.selectedDay == today.get(Calendar.DAY_OF_MONTH)
+        val isAm = picker.selectedHour < 12
+        val displayHour = when {
+            picker.selectedHour == 0 -> 12
+            picker.selectedHour > 12 -> picker.selectedHour - 12
+            else -> picker.selectedHour
+        }
+        val timeStr = String.format(
+            Locale.ENGLISH, "%d:%02d %s",
+            displayHour, picker.selectedMinute, if (isAm) "AM" else "PM"
+        )
+        return if (isToday) {
+            "Today, $timeStr"
+        } else {
+            val cal = Calendar.getInstance().apply {
+                set(picker.selectedYear, picker.selectedMonth - 1, picker.selectedDay)
+            }
+            val dateStr = SimpleDateFormat("dd MMM", Locale.ENGLISH).format(cal.time)
+            "$dateStr, $timeStr"
+        }
+    }
+
     fun onPassengersClick() = Unit
     fun onOptionsClick() = Unit
     fun onConnectionTypeClick() = Unit
