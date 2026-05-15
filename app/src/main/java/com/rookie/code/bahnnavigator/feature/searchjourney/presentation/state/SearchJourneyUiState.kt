@@ -5,8 +5,10 @@ data class SearchJourneyUiState(
     val to: String = "",
     val date: String = "Today, 12:17",
     val passengers: String = "1 pers. | 2nd Cl.",
-    val options: String = "Means of transport",
+    val optionsLabel: String = "Means of transport",
     val connectionType: String = "Fastest Route",
     val locationPicker: LocationPickerUiState = LocationPickerUiState(),
-    val datePicker: DateTimePickerUiState = DateTimePickerUiState()
+    val datePicker: DateTimePickerUiState = DateTimePickerUiState(),
+    val optionsPicker: OptionsUiState = OptionsUiState(),
+    val connectionTypePicker: ConnectionTypeUiState = ConnectionTypeUiState()
 )

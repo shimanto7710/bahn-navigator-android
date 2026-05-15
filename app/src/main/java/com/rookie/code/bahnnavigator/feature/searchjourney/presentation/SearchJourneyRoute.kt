@@ -13,6 +13,9 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rookie.code.bahnnavigator.feature.searchjourney.presentation.components.DatePickerSheet
 import com.rookie.code.bahnnavigator.feature.searchjourney.presentation.components.LocationPickerSheet
+import com.rookie.code.bahnnavigator.feature.searchjourney.presentation.components.ConnectionTypeSheet
+import com.rookie.code.bahnnavigator.feature.searchjourney.presentation.components.ModeOfTransportSheet
+import com.rookie.code.bahnnavigator.feature.searchjourney.presentation.components.OptionsSheet
 import com.rookie.code.bahnnavigator.feature.searchjourney.presentation.state.PickerTarget
 
 @Composable
@@ -75,6 +78,47 @@ fun SearchJourneyRoute(
             onToggleFavorite = viewModel::onToggleFavorite,
             onCurrentPositionClick = requestLocation,
             onNearbyStopsClick = requestLocation
+        )
+    }
+
+    if (uiState.optionsPicker.isVisible) {
+        OptionsSheet(
+            state = uiState.optionsPicker,
+            onDismiss = viewModel::onOptionsPickerDismiss,
+            onDone = viewModel::onOptionsPickerDone,
+            onModeOfTransportClick = viewModel::onModeOfTransportClick,
+            onDTicketToggle = viewModel::onDTicketToggle,
+            onBicycleToggle = viewModel::onBicycleToggle,
+            onDirectServicesToggle = viewModel::onDirectServicesToggle,
+            onReset = viewModel::onOptionsReset
+        )
+    }
+
+    if (uiState.optionsPicker.modeOfTransport.isVisible) {
+        ModeOfTransportSheet(
+            state = uiState.optionsPicker.modeOfTransport,
+            onBack = viewModel::onModeOfTransportDismiss,
+            onDone = viewModel::onModeOfTransportDismiss,
+            onModeSelected = viewModel::onModeSelected,
+            onHighSpeedToggle = viewModel::onHighSpeedToggle,
+            onIntercityToggle = viewModel::onIntercityToggle,
+            onInterregioToggle = viewModel::onInterregioToggle,
+            onRegionalToggle = viewModel::onRegionalToggle,
+            onSBahnToggle = viewModel::onSBahnToggle,
+            onBussesToggle = viewModel::onBussesToggle,
+            onBoatsToggle = viewModel::onBoatsToggle,
+            onUndergroundToggle = viewModel::onUndergroundToggle,
+            onTramToggle = viewModel::onTramToggle,
+            onTelServicesToggle = viewModel::onTelServicesToggle
+        )
+    }
+
+    if (uiState.connectionTypePicker.isVisible) {
+        ConnectionTypeSheet(
+            state = uiState.connectionTypePicker,
+            onDismiss = viewModel::onConnectionTypeDismiss,
+            onDone = viewModel::onConnectionTypeDismiss,
+            onSelect = viewModel::onConnectionTypeSelected
         )
     }
 

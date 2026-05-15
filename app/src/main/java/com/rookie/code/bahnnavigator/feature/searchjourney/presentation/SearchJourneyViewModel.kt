@@ -174,8 +174,131 @@ class SearchJourneyViewModel @Inject constructor(
     }
 
     fun onPassengersClick() = Unit
-    fun onOptionsClick() = Unit
-    fun onConnectionTypeClick() = Unit
+
+    fun onOptionsClick() {
+        _uiState.update { it.copy(optionsPicker = it.optionsPicker.copy(isVisible = true)) }
+    }
+
+    fun onOptionsPickerDismiss() {
+        _uiState.update { it.copy(optionsPicker = it.optionsPicker.copy(isVisible = false)) }
+    }
+
+    fun onOptionsPickerDone() {
+        _uiState.update { it.copy(optionsPicker = it.optionsPicker.copy(isVisible = false)) }
+    }
+
+    fun onDTicketToggle(value: Boolean) {
+        _uiState.update { it.copy(optionsPicker = it.optionsPicker.copy(dTicketOnly = value)) }
+    }
+
+    fun onBicycleToggle(value: Boolean) {
+        _uiState.update { it.copy(optionsPicker = it.optionsPicker.copy(bicycleTransport = value)) }
+    }
+
+    fun onDirectServicesToggle(value: Boolean) {
+        _uiState.update { it.copy(optionsPicker = it.optionsPicker.copy(directServicesOnly = value)) }
+    }
+
+    fun onOptionsReset() {
+        _uiState.update {
+            it.copy(optionsPicker = it.optionsPicker.copy(
+                dTicketOnly = false,
+                bicycleTransport = false,
+                directServicesOnly = false,
+                modeOfTransport = it.optionsPicker.modeOfTransport.copy(
+                    selectedMode = "Local/regional transport only",
+                    highSpeedTrains = false, intercityTrains = false,
+                    interregioTrains = false, regionalTrains = true,
+                    sBahn = true, busses = true, boats = true,
+                    underground = true, tram = true, telServices = true
+                ),
+                transferTime = "Standard",
+                stopovers = "None"
+            ))
+        }
+    }
+
+    fun onModeOfTransportClick() {
+        _uiState.update {
+            it.copy(optionsPicker = it.optionsPicker.copy(
+                modeOfTransport = it.optionsPicker.modeOfTransport.copy(isVisible = true)
+            ))
+        }
+    }
+
+    fun onModeOfTransportDismiss() {
+        _uiState.update {
+            it.copy(optionsPicker = it.optionsPicker.copy(
+                modeOfTransport = it.optionsPicker.modeOfTransport.copy(isVisible = false)
+            ))
+        }
+    }
+
+    fun onModeSelected(mode: String) {
+        _uiState.update {
+            val current = it.optionsPicker.modeOfTransport
+            val updated = when (mode) {
+                "All" -> current.copy(
+                    selectedMode = mode,
+                    highSpeedTrains = true, intercityTrains = true,
+                    interregioTrains = true, regionalTrains = true,
+                    sBahn = true, busses = true, boats = true,
+                    underground = true, tram = true, telServices = true
+                )
+                "Long-distance travel only" -> current.copy(
+                    selectedMode = mode,
+                    highSpeedTrains = true, intercityTrains = true,
+                    interregioTrains = true, regionalTrains = false,
+                    sBahn = false, busses = false, boats = false,
+                    underground = false, tram = false, telServices = false
+                )
+                "Local/regional transport only" -> current.copy(
+                    selectedMode = mode,
+                    highSpeedTrains = false, intercityTrains = false,
+                    interregioTrains = false, regionalTrains = true,
+                    sBahn = true, busses = true, boats = true,
+                    underground = true, tram = true, telServices = true
+                )
+                else -> current.copy(selectedMode = mode)
+            }
+            it.copy(optionsPicker = it.optionsPicker.copy(modeOfTransport = updated))
+        }
+    }
+
+    private fun updateTransport(block: (com.rookie.code.bahnnavigator.feature.searchjourney.presentation.state.ModeOfTransportUiState) -> com.rookie.code.bahnnavigator.feature.searchjourney.presentation.state.ModeOfTransportUiState) {
+        _uiState.update {
+            it.copy(optionsPicker = it.optionsPicker.copy(
+                modeOfTransport = block(it.optionsPicker.modeOfTransport)
+            ))
+        }
+    }
+
+    fun onHighSpeedToggle(v: Boolean) = updateTransport { it.copy(highSpeedTrains = v) }
+    fun onIntercityToggle(v: Boolean) = updateTransport { it.copy(intercityTrains = v) }
+    fun onInterregioToggle(v: Boolean) = updateTransport { it.copy(interregioTrains = v) }
+    fun onRegionalToggle(v: Boolean) = updateTransport { it.copy(regionalTrains = v) }
+    fun onSBahnToggle(v: Boolean) = updateTransport { it.copy(sBahn = v) }
+    fun onBussesToggle(v: Boolean) = updateTransport { it.copy(busses = v) }
+    fun onBoatsToggle(v: Boolean) = updateTransport { it.copy(boats = v) }
+    fun onUndergroundToggle(v: Boolean) = updateTransport { it.copy(underground = v) }
+    fun onTramToggle(v: Boolean) = updateTransport { it.copy(tram = v) }
+    fun onTelServicesToggle(v: Boolean) = updateTransport { it.copy(telServices = v) }
+    fun onConnectionTypeClick() {
+        _uiState.update { it.copy(connectionTypePicker = it.connectionTypePicker.copy(isVisible = true)) }
+    }
+
+    fun onConnectionTypeDismiss() {
+        _uiState.update { it.copy(connectionTypePicker = it.connectionTypePicker.copy(isVisible = false)) }
+    }
+
+    fun onConnectionTypeSelected(option: String) {
+        _uiState.update {
+            it.copy(
+                connectionType = option,
+                connectionTypePicker = it.connectionTypePicker.copy(selected = option, isVisible = false)
+            )
+        }
+    }
     fun onSearchClick() = Unit
 
     fun onLocationPickerOpened(target: PickerTarget) {

@@ -80,7 +80,7 @@ fun SearchJourneyScreen(
         FilterRows(
             date = uiState.date,
             passengers = uiState.passengers,
-            options = uiState.options,
+            options = uiState.optionsLabel,
             connectionType = uiState.connectionType,
             onDateClick = onDateClick,
             onPassengersClick = onPassengersClick,
